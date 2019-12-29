@@ -1,10 +1,10 @@
-package com.cisco.scqo.fqiApp;
+package com.assignment.github;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class FqiAppApplicationTests {
+class GithubAssignmentAppTests {
 
 	@Test
 	void contextLoads() {
