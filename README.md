@@ -1,6 +1,6 @@
 # Github-Assignment
 
-1. The project requires the following to run: 
+1. The project requires the following tools to run: 
 
 --Java 1.8 
 
