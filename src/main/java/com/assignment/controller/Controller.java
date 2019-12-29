@@ -19,22 +19,20 @@ import com.assignment.access.SearchRepository;
 import com.assignment.access.UserRepository;
 import com.assignment.entity.GitObject;
 import com.assignment.entity.Search;
+import com.assignment.service.AppServices;
 import com.assignment.util.RestClient;
+import com.google.gson.Gson;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
 @Repository
 @RestController
-@RequestMapping(value = "/fqiapp/service")
+@RequestMapping(value = "/app/service")
 public class Controller {
 
-	
 	  @Autowired 
-	  private UserRepository userRepository;
-	  
-	  @Autowired 
-	  private SearchRepository searchRepository;
+	  private AppServices appServices;
 	  
 	  private SessionFactory sessionFactory;
 	
@@ -49,21 +47,9 @@ public class Controller {
 	
 	@RequestMapping(value = "/search/{name}", method = RequestMethod.GET)
 	public @ResponseBody String searchApi(@PathVariable(value = "name") String name) throws Exception {
-		//RestClient client = new RestClient();
-		Search search = new Search();
-		search.setName(name);
-		List<Search> search1 = new ArrayList<Search>();
-		 search1 = searchRepository.findByName(name);
-		if(search1.size()>0) {
-			System.out.println("foundddddddd");
-		}
-		else
-		{
-		searchRepository.save(search);
-		}
-		return RestClient.get("https://api.github.com/users/" + name);
+		return appServices.searchApi(name);
 	}
-	
+	/*
 	@Transactional
 	@RequestMapping(value = "/apiController2", method = RequestMethod.GET)
 	public @ResponseBody String testApi2() throws Exception {
@@ -74,8 +60,8 @@ public class Controller {
 		    userRepository.save(object);
 		    return "Saved";
 	}
-	
-	
+	*/
+	/*
 	
 	@RequestMapping(value = "/getAll", method = RequestMethod.GET)
 	public @ResponseBody List<GitObject> testApi3() throws Exception {
@@ -83,27 +69,22 @@ public class Controller {
 		    return (List<GitObject>) userRepository.findAll();
 
 	}
-	
+	*/
 	
 	@RequestMapping(value = "/getSearchedNames", method = RequestMethod.GET)
-	public @ResponseBody List<Search> getSearchedNames() throws Exception {
+	public @ResponseBody String getSearchedNames() throws Exception {
 		   // GitObject object = new GitObject();
-		    return (List<Search>) searchRepository.findAll();
+		    //return (List<Search>) searchRepository.findAll();
+		    
+		    return appServices.getSearchedNames();
 
 	}
 	
 	
 	@RequestMapping(value = "/delete/{id}", method = RequestMethod.GET)
 	public @ResponseBody String testApi3(@PathVariable(value = "id") Integer id) throws Exception {
-		  
-		
-	   GitObject object = userRepository.findById(id)
-       .orElseThrow(() -> new Exception("not found"));
-
-	    
-	    userRepository.delete(object);
-
-	    return  "delete successful";
+	
+		return appServices.deleteApi(id);
 
 		
 		

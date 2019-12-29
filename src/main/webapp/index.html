@@ -2,23 +2,31 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid.min.css" />
+<link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid-theme.min.css" />
 
+ <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+ 
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid.min.js"></script>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script>
 
 $( document ).ready(function() {
 	  // Handler for .ready() called.
    $("#resultField").hide();
    $('div#historyMain').hide();
+
 	  
-	  
-	
+   
+
+   
    $("#searchLink").click(function(e) {
        e.preventDefault();
        $('div#historyMain').hide();      
        $('div#searchMain').fadeIn();    
-       
+       document.getElementById('historyLink').setAttribute("class", "");
+       document.getElementById('searchLink').setAttribute("class", "active");
+
        
        
        return false;
@@ -29,20 +37,116 @@ $( document ).ready(function() {
        e.preventDefault();
        $('div#searchMain').hide();      
        $('div#historyMain').fadeIn(); 
-       
-       var url = "/fqiapp/service/getSearchedNames/";
+       document.getElementById('historyLink').setAttribute("class", "active");
+       document.getElementById('searchLink').setAttribute("class", "");
+       var url = "/app/service/getSearchedNames/";
        $.get( url, function( data ) {
 			  $( ".result" ).html( data );
-			  alert( "Load was performed." );
+			  //alert( "Load was performed." );
 			  console.log(data);
-			  /*
+			  
 			  if(data!="Not found"){
 			  var obj = JSON.parse(data);
+			  $("#jsGrid").jsGrid({
+			       // height: "90%",
+			       // width: "100%",
+			
+			        width: "70%",
+			        height: "auto",
+			        filtering: true,
+			        sorting: true,
+			        paging: true,
+			        pageSize: 10,
+			        data: obj,
+			       // autoload: true,
+
+			        fields: [
+			        	 {
+			                 headerTemplate: function() {
+			                     return $("<button>").attr("type", "button").text("Delete")
+			                             .on("click", function () {
+			                                 deleteSelectedItems();
+			                             });
+			                 },
+			                 itemTemplate: function(_, item) {
+			                     return $("<input>").attr("type", "checkbox")
+			                             .prop("checked", $.inArray(item, selectedItems) > -1)
+			                             .on("change", function () {
+			                                 $(this).is(":checked") ? selectItem(item) : unselectItem(item);
+			                             });
+			                 },
+			                 align: "center",
+			                 width: 50
+			             },
+			            { name: "id", type: "number", width: 150 },
+			            { name: "name", type: "text", width: 150 }
+			            
+			        ]
+			  
+			  
+			    });
 			  }
 			  else{
 			  }
-			  */
+			  console.log(obj[0]);
 			});
+       
+       var selectedItems = [];
+       
+       var selectItem = function(item) {
+           selectedItems.push(item);
+       };
+    
+       var unselectItem = function(item) {
+           selectedItems = $.grep(selectedItems, function(i) {
+               return i !== item;
+           });
+       };
+    
+       var deleteSelectedItems = function() {
+           if(!selectedItems.length || !confirm("Are you sure. The rows selected will be deleted from the DB!?"))
+               return;
+    
+           deleteClientsFromDb(selectedItems);
+    
+           var $grid = $("#jsGrid");
+           $grid.jsGrid("option", "pageIndex", 1);
+           $grid.jsGrid("loadData");
+    
+           selectedItems = [];
+       };
+    
+       var deleteClientsFromDb = function(deletingClients) {
+    	   /*
+           db.clients = $.map(db.clients, function(client) {
+               return ($.inArray(client, deletingClients) > -1) ? null : client;
+           });
+    	   */
+    	   console.log("deleting multiple vals");
+    	   console.log(deletingClients);
+    	   
+    	   var arrayLength = deletingClients.length;
+
+    	   for(var i=0;i < arrayLength; i++){
+    	   var deleteUrl = "app/service/delete/" + deletingClients[i].id;
+    	   $.ajax({
+    		   type: "GET",
+    		   url: deleteUrl,
+    		  // data: data,
+    		 //  success: success,
+    		  // dataType: dataType
+    		 });
+    	  // $("#jsGrid").jsGrid("refresh");
+    	 //  $("#jsGrid").jsGrid("reset");
+    	   }
+    	   $("#jsGrid").jsGrid("refresh");
+    	  // $("#jsGrid").jsGrid("destroy");
+			//location.reload();
+			//window.open("/#pastResults");
+    	   $( "#historyLink" ).trigger( "click" );
+
+       };
+
       
     
        //return false;  
@@ -52,10 +156,10 @@ $( document ).ready(function() {
 	  
 	$("#searchButton").click(function(){
 		$("#resultField").hide();
-		  alert("The paragraph was clicked.");
+		 // alert("The paragraph was clicked.");
 		  console.log("clicked");
 		  var name = document.getElementById("searchUserTextButton").value;
-		  var context = "/fqiapp/service/search/";
+		  var context = "/app/service/search/";
 		  var url = context.concat(name);
 
 		  $.get( url, function( data ) {
@@ -63,7 +167,7 @@ $( document ).ready(function() {
 			  document.getElementById('nameField').innerHTML = "";
 			  document.getElementById('createdField').innerHTML = "";
 			  document.getElementById('urlField').innerHTML = "";
-			  alert( "Load was performed." );
+			  alert( "Loading. Pls click to continue." );
 			  console.log(data);
 			  
 			  if(data!="Not found"){
@@ -83,13 +187,25 @@ $( document ).ready(function() {
 			});
 		});
 	  
+	
+	 
+	
+		
 	  
 	});
 
 </script>
 
 
+
+
 <style>
+/*
+body {
+  background-image: url('Light-Grey-Background-Hd-5.jpg');
+}
+*/
+
 * {box-sizing: border-box;}
 
 body { 
@@ -189,9 +305,9 @@ input[type=text]:focus {
 
 <div id = "searchMain">
 <div style="padding-left:20px">
-  <h3>Please enter a username:</h3>
+  <h3>Please enter a Github username:</h3>
   <p>
-  <input id= "searchUserTextButton" type="text" name="search" placeholder="Search for a user...">
+  <input id= "searchUserTextButton" type="text" name="search" placeholder="Search for a github user...">
   </p>
 <input type="submit" value="Submit" id="searchButton">
 
@@ -216,10 +332,12 @@ input[type=text]:focus {
 <div style="padding-left:20px">
   <h3>Past search history:</h3>
  
-
+<div id="jsGrid"></div>
 </div>
 
 </div>
+
+
 
 
 </body>
